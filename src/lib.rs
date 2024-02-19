@@ -7,6 +7,7 @@ use db::{get_connection_with_table, GetConnectionWithTableError};
 
 pub mod args;
 mod commands;
+mod config;
 mod db;
 mod terminal;
 mod todo;

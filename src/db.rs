@@ -1,6 +1,9 @@
 use std::rc::Rc;
 
-use crate::todo;
+use crate::{
+    config::{get_db_path, GetDbPathError},
+    todo,
+};
 use rusqlite::{types::Value, Connection};
 
 const CREATE_TABLE_QUERY: &str = "CREATE TABLE IF NOT EXISTS todos (
@@ -127,11 +130,16 @@ pub fn remove_todos(connection: &Connection, ids: Vec<usize>) -> Result<(), Remo
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Fail to create and connect to a db")]
-pub struct GetConnectionError(#[from] rusqlite::Error);
+pub enum GetConnectionError {
+    #[error("Fail to create and connect to a db")]
+    Open(#[from] rusqlite::Error),
+
+    #[error(transparent)]
+    GetDbPath(#[from] GetDbPathError),
+}
 
 pub fn get_connection() -> Result<Connection, GetConnectionError> {
-    let connection = Connection::open("todos.db")?;
+    let connection = Connection::open(get_db_path()?)?;
 
     Ok(connection)
 }
